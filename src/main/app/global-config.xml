@@ -6,10 +6,6 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
-    <flow name="maven-test-releasepluginFlow">
-        <http:listener config-ref="HTTP_Listener_Configuration" path="/processRequest" doc:name="HTTP"/>
-        <logger message="Request received " level="INFO" doc:name="Logger"/>
-        <set-payload value="#['Hello, Good Morning']" doc:name="Set Payload"/>
-        <logger message="Request processed" level="INFO" doc:name="Logger"/>
-    </flow>
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <http:request-config name="HTTP_Request_Configuration" doc:name="HTTP Request Configuration"/>
 </mule>

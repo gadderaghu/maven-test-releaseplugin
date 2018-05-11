@@ -1,7 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.9.0"
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
-http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd"></mule>
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <flow name="maven-test-releasepluginFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/processRequest" doc:name="HTTP"/>
+        <logger message="Request received " level="INFO" doc:name="Logger"/>
+        <set-payload value="#['Hello, Good Morning']" doc:name="Set Payload"/>
+        <logger message="#[message.inboundProperties]" level="INFO" doc:name="Logger"/>
+        <component  doc:name="Java">
+            <spring-object bean="props"/>
+        </component>
+        <foreach collection="#[payload]" doc:name="For Each">
+            <logger message="#[message.inboundProperties]" level="INFO" doc:name="Logger"/>
+        </foreach>
+        <http:request config-ref="HTTP_Request_Configuration" path="/duplicate" method="GET" doc:name="HTTP"/>
+    </flow>
+    <flow name="maven-test-releasepluginFlow1">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/duplicate" doc:name="HTTP"/>
+        <logger message="Message Inbound Properties: #[message.inboundProperties]" level="INFO" doc:name="Logger"/>
+        <set-payload value="#['From Duplicate']" doc:name="Set Payload"/>
+        <foreach collection="#[message.inboundProperties]" doc:name="For Each">
+            <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        </foreach>
+        <set-property propertyName="#[message.outboundProperties]" value="#[message.inboundProperties]" doc:name="Property"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/triplicate" method="GET" doc:name="HTTP"/>
+    </flow>
+    <flow name="maven-test-releasepluginFlow2">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/triplicate" doc:name="HTTP"/>
+        <logger message="In triplicate Flow" level="INFO" doc:name="Logger"/>
+        <set-payload value="#['Hello , Payload set from Triplicate']" doc:name="Set Payload"/>
+        <logger message="Inbound Properties::#[message.inboundProperties]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>

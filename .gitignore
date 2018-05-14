@@ -6,3 +6,6 @@ target/classes/mule-deploy.properties
 target/classes/maven-test-releaseplugin.xml
 target/classes/mule-deploy.properties
 target/mvn-eclipse-cache.properties
+target/classes/maven-test-releaseplugin.xml
+target/classes/maven-test-releaseplugin.xml
+target/mvn-eclipse-cache.properties

@@ -1,23 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+    <spring:beans>
+        <spring:bean id="Bean" name="Bean" class="ThreadSleep"/>
+    </spring:beans>
+    
     <flow name="maven-test-releasepluginFlow">
         <http:listener config-ref="HTTP_Listener_Configuration" path="/processRequest" doc:name="HTTP"/>
         <logger message="Request received " level="INFO" doc:name="Logger"/>
         <set-payload value="#['Hello, Good Morning']" doc:name="Set Payload"/>
-        <logger message="#[message.inboundProperties]" level="INFO" doc:name="Logger"/>
-        <component  doc:name="Java">
-            <spring-object bean="props"/>
+        <async doc:name="Async">
+            <logger message="First Message Processor is in Async Scope: #[server.dateTime]" level="INFO" doc:name="Logger"/>
+            <component doc:name="Java">
+                <spring-object bean="Bean"/>
+            </component>
+            <logger message="Last Message Processor is in Async Scope: #[server.dateTime]" level="INFO" doc:name="Logger"/>
+        </async>
+        
+        <component doc:name="Java">
+            <spring-object bean="Bean"/>
         </component>
+        <logger message="#[server.dateTime] ::--&gt; #[message.inboundProperties]" level="INFO" doc:name="Logger"/>
+       <!--  <component  doc:name="Java">
+            <spring-object bean="props"/>
+        </component> 
         <foreach collection="#[payload]" doc:name="For Each">
             <logger message="#[message.inboundProperties]" level="INFO" doc:name="Logger"/>
-        </foreach>
-        <http:request config-ref="HTTP_Request_Configuration" path="/duplicate" method="GET" doc:name="HTTP"/>
+        </foreach> -->
+        <logger message="mailId:: #[message.inboundProperties.username]" level="INFO" doc:name="Logger"/>
+        <logger message="messageId::#[message.inboundProperties.messageId] and Payload is :: #[payload]" level="INFO" doc:name="Logger"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/duplicate" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:uri-param paramName="userId" value="#[message.inboundProperties.username]"/>
+                <http:uri-param paramName="id" value="#[message.inboundProperties.messageId]"/>
+            </http:request-builder>
+        </http:request>
     </flow>
     <flow name="maven-test-releasepluginFlow1">
         <http:listener config-ref="HTTP_Listener_Configuration" path="/duplicate" doc:name="HTTP"/>
